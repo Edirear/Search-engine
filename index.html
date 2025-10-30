@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edirears Search Engine</title>
+    <style>
+        :root {
+            --bg-color: #000000;
+            --text-color: #ffffff;
+            --accent-color: #00f2c3; /* TikTok green */
+            --secondary-color: #00d4ff; /* TikTok blue accent */
+            --card-bg: #121212;
+            --border-color: #2a2a2a;
+            --button-color: #00f2c3;
+            --button-hover: #00d4aa;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+
+        /* Header Styles */
+        header {
+            position: sticky;
+            top: 0;
+            background-color: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo h1 {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(45deg, var(--accent-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(45deg, var(--accent-color), var(--secondary-color));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        /* Search Bar */
+        .search-container {
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background-color: var(--card-bg);
+            border-radius: 24px;
+            padding: 8px 16px;
+            border: 1px solid var(--border-color);
+        }
+
+        .search-bar input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-color);
+            padding: 10px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .search-bar button {
+            background: var(--button-color);
+            border: none;
+            border-radius: 20px;
+            color: #000;
+            padding: 8px 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .search-bar button:hover {
+            background: var(--button-hover);
+            transform: scale(1.05);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            font-weight: 600;
+            position: relative;
+            color: #aaa;
+        }
+
+        .tab.active {
+            color: var(--accent-color);
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--accent-color);
+        }
+
+        /* Content Sections */
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        /* Images Grid */
+        .images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .image-item {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            aspect-ratio: 1/1;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+        }
+
+        .image-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+
+        .image-item:hover img {
+            transform: scale(1.05);
+        }
+
+        /* Websites List */
+        .websites-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .website-item {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .website-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-color);
+            text-decoration: none;
+        }
+
+        .website-snippet {
+            color: #a8a8a8;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .website-url {
+            color: var(--accent-color);
+            font-size: 12px;
+        }
+
+        .website-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-color);
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .action-btn.primary {
+            background: var(--button-color);
+            border: none;
+            color: #000;
+        }
+
+        .action-btn.primary:hover {
+            background: var(--button-hover);
+        }
+
+        /* Browser Modal */
+        .browser-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            flex-direction: column;
+        }
+
+        .browser-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .browser-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .browser-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-color);
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+        }
+
+        .browser-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .browser-url {
+            flex: 1;
+            margin: 0 16px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 14px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .browser-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .browser-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .browser-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background-color: white;
+        }
+
+        .browser-options {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 1001;
+            border: 1px solid var(--border-color);
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .option-label {
+            min-width: 100px;
+        }
+
+        .option-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .zoom-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .zoom-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: var(--text-color);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .zoom-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Switch styling */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--button-color);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-left: 4px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .images-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 16px;
+            }
+            
+            .logo {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">E</div>
+                    <h1>Edirears Search Engine</h1>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="search-container">
+            <div class="search-bar">
+                <input type="text" id="search-input" placeholder="Search anything...">
+                <button id="search-button">Search</button>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" data-tab="websites">Websites</div>
+            <div class="tab" data-tab="images">Images</div>
+        </div>
+
+        <div id="websites-section" class="content-section active">
+            <div class="websites-list" id="websites-results">
+                <!-- Websites results will be displayed here -->
+            </div>
+        </div>
+
+        <div id="images-section" class="content-section">
+            <div class="images-grid" id="images-results">
+                <!-- Images results will be displayed here -->
+            </div>
+        </div>
+
+        <div class="loading" id="loading" style="display: none;">
+            <div class="spinner"></div>
+        </div>
+    </main>
+
+    <!-- Browser Modal -->
+    <div class="browser-modal" id="browser-modal">
+        <div class="browser-header">
+            <div class="browser-controls">
+                <button class="browser-btn" id="browser-back">←</button>
+                <button class="browser-btn" id="browser-forward">→</button>
+                <button class="browser-btn" id="browser-refresh">↻</button>
+            </div>
+            <div class="browser-url" id="browser-url">https://example.com</div>
+            <div class="browser-actions">
+                <button class="browser-btn" id="browser-options">⋮</button>
+                <button class="browser-btn" id="browser-close">✕</button>
+            </div>
+        </div>
+        <div class="browser-content">
+            <iframe class="browser-iframe" id="browser-iframe" src="about:blank"></iframe>
+        </div>
+        <div class="browser-options" id="browser-options-panel">
+            <div class="option-item">
+                <div class="option-label">Desktop Mode</div>
+                <label class="switch">
+                    <input type="checkbox" id="desktop-mode">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="option-item">
+                <div class="option-label">Zoom</div>
+                <div class="zoom-controls">
+                    <button class="zoom-btn" id="zoom-out">-</button>
+                    <span id="zoom-level">100%</span>
+                    <button class="zoom-btn" id="zoom-in">+</button>
+                </div>
+            </div>
+            <div class="option-item">
+                <button class="action-btn primary" id="open-in-chrome">Open in Chrome</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration
+        const API_KEY = 'AIzaSyCPuD4BENdE_wzlX4D6ceTdxmVXyDd-dwE';
+        const SEARCH_ENGINE_ID = '10cc1f0b46c154e83';
+
+        // DOM Elements
+        const searchInput = document.getElementById('search-input');
+        const searchButton = document.getElementById('search-button');
+        const tabs = document.querySelectorAll('.tab');
+        const contentSections = document.querySelectorAll('.content-section');
+        const websitesResults = document.getElementById('websites-results');
+        const imagesResults = document.getElementById('images-results');
+        const loading = document.getElementById('loading');
+        
+        // Browser Modal Elements
+        const browserModal = document.getElementById('browser-modal');
+        const browserIframe = document.getElementById('browser-iframe');
+        const browserUrl = document.getElementById('browser-url');
+        const browserBack = document.getElementById('browser-back');
+        const browserForward = document.getElementById('browser-forward');
+        const browserRefresh = document.getElementById('browser-refresh');
+        const browserClose = document.getElementById('browser-close');
+        const browserOptions = document.getElementById('browser-options');
+        const browserOptionsPanel = document.getElementById('browser-options-panel');
+        const desktopMode = document.getElementById('desktop-mode');
+        const zoomOut = document.getElementById('zoom-out');
+        const zoomIn = document.getElementById('zoom-in');
+        const zoomLevel = document.getElementById('zoom-level');
+        const openInChrome = document.getElementById('open-in-chrome');
+
+        // State Variables
+        let currentQuery = '';
+        let currentZoom = 100;
+        let isDesktopMode = false;
+
+        // Event Listeners
+        searchButton.addEventListener('click', performSearch);
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabName = tab.getAttribute('data-tab');
+                
+                // Update active tab
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // Update active content section
+                contentSections.forEach(section => {
+                    section.classList.remove('active');
+                    if (section.id === `${tabName}-section`) {
+                        section.classList.add('active');
+                    }
+                });
+                
+                // If there's a current query, fetch results for the active tab
+                if (currentQuery) {
+                    if (tabName === 'websites') {
+                        fetchWebsites(currentQuery);
+                    } else if (tabName === 'images') {
+                        fetchImages(currentQuery);
+                    }
+                }
+            });
+        });
+
+        // Browser Modal Event Listeners
+        browserBack.addEventListener('click', () => {
+            browserIframe.contentWindow.history.back();
+        });
+
+        browserForward.addEventListener('click', () => {
+            browserIframe.contentWindow.history.forward();
+        });
+
+        browserRefresh.addEventListener('click', () => {
+            browserIframe.contentWindow.location.reload();
+        });
+
+        browserClose.addEventListener('click', () => {
+            browserModal.style.display = 'none';
+            browserOptionsPanel.style.display = 'none';
+        });
+
+        browserOptions.addEventListener('click', () => {
+            browserOptionsPanel.style.display = browserOptionsPanel.style.display === 'flex' ? 'none' : 'flex';
+        });
+
+        desktopMode.addEventListener('change', () => {
+            isDesktopMode = desktopMode.checked;
+            updateIframeUserAgent();
+        });
+
+        zoomOut.addEventListener('click', () => {
+            if (currentZoom > 50) {
+                currentZoom -= 10;
+                updateZoom();
+            }
+        });
+
+        zoomIn.addEventListener('click', () => {
+            if (currentZoom < 200) {
+                currentZoom += 10;
+                updateZoom();
+            }
+        });
+
+        openInChrome.addEventListener('click', () => {
+            const currentUrl = browserIframe.src;
+            window.open(currentUrl, '_blank');
+        });
+
+        // Functions
+        function performSearch() {
+            currentQuery = searchInput.value.trim();
+            if (!currentQuery) return;
+            
+            // Show loading
+            loading.style.display = 'flex';
+            
+            // Determine which tab is active and fetch accordingly
+            const activeTab = document.querySelector('.tab.active').getAttribute('data-tab');
+            if (activeTab === 'websites') {
+                fetchWebsites(currentQuery);
+            } else {
+                fetchImages(currentQuery);
+            }
+        }
+
+        async function fetchWebsites(query) {
+            try {
+                websitesResults.innerHTML = '';
+                const url = `https://www.googleapis.com/customsearch/v1?key=${API_KEY}&cx=${SEARCH_ENGINE_ID}&q=${encodeURIComponent(query)}&num=10`;
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                loading.style.display = 'none';
+                
+                if (data.items && data.items.length > 0) {
+                    data.items.forEach(item => {
+                        const websiteItem = createWebsiteItem(item);
+                        websitesResults.appendChild(websiteItem);
+                    });
+                    
+                    // If we have less than 50 results, make additional requests
+                    let startIndex = 11;
+                    while (data.items.length < 50 && startIndex <= 91) {
+                        const nextUrl = `https://www.googleapis.com/customsearch/v1?key=${API_KEY}&cx=${SEARCH_ENGINE_ID}&q=${encodeURIComponent(query)}&num=10&start=${startIndex}`;
+                        
+                        try {
+                            const nextResponse = await fetch(nextUrl);
+                            const nextData = await nextResponse.json();
+                            
+                            if (nextData.items && nextData.items.length > 0) {
+                                nextData.items.forEach(item => {
+                                    const websiteItem = createWebsiteItem(item);
+                                    websitesResults.appendChild(websiteItem);
+                                    data.items.push(item);
+                                });
+                            } else {
+                                break; // No more results
+                            }
+                        } catch (error) {
+                            console.error('Error fetching additional results:', error);
+                            break;
+                        }
+                        
+                        startIndex += 10;
+                    }
+                } else {
+                    websitesResults.innerHTML = '<p>No results found</p>';
+                }
+            } catch (error) {
+                console.error('Error fetching websites:', error);
+                loading.style.display = 'none';
+                websitesResults.innerHTML = '<p>Error fetching results. Please try again.</p>';
+            }
+        }
+
+        function createWebsiteItem(item) {
+            const websiteItem = document.createElement('div');
+            websiteItem.className = 'website-item';
+            
+            websiteItem.innerHTML = `
+                <a href="${item.link}" class="website-title" target="_blank">${item.title}</a>
+                <p class="website-snippet">${item.snippet || 'No description available'}</p>
+                <div class="website-url">${item.displayLink}</div>
+                <div class="website-actions">
+                    <button class="action-btn primary open-in-browser" data-url="${item.link}">Open in Browser</button>
+                    <button class="action-btn open-in-chrome" data-url="${item.link}">Open in Chrome</button>
+                </div>
+            `;
+            
+            // Add event listeners to buttons
+            websiteItem.querySelector('.open-in-browser').addEventListener('click', (e) => {
+                e.preventDefault();
+                openInBrowser(item.link);
+            });
+            
+            websiteItem.querySelector('.open-in-chrome').addEventListener('click', (e) => {
+                e.preventDefault();
+                window.open(item.link, '_blank');
+            });
+            
+            return websiteItem;
+        }
+
+        async function fetchImages(query) {
+            try {
+                imagesResults.innerHTML = '';
+                const url = `https://www.googleapis.com/customsearch/v1?key=${API_KEY}&cx=${SEARCH_ENGINE_ID}&q=${encodeURIComponent(query)}&searchType=image&num=10`;
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                loading.style.display = 'none';
+                
+                if (data.items && data.items.length > 0) {
+                    data.items.forEach(item => {
+                        const imageItem = createImageItem(item);
+                        imagesResults.appendChild(imageItem);
+                    });
+                    
+                    // If we have less than 50 results, make additional requests
+                    let startIndex = 11;
+                    while (data.items.length < 50 && startIndex <= 91) {
+                        const nextUrl = `https://www.googleapis.com/customsearch/v1?key=${API_KEY}&cx=${SEARCH_ENGINE_ID}&q=${encodeURIComponent(query)}&searchType=image&num=10&start=${startIndex}`;
+                        
+                        try {
+                            const nextResponse = await fetch(nextUrl);
+                            const nextData = await nextResponse.json();
+                            
+                            if (nextData.items && nextData.items.length > 0) {
+                                nextData.items.forEach(item => {
+                                    const imageItem = createImageItem(item);
+                                    imagesResults.appendChild(imageItem);
+                                    data.items.push(item);
+                                });
+                            } else {
+                                break; // No more results
+                            }
+                        } catch (error) {
+                            console.error('Error fetching additional images:', error);
+                            break;
+                        }
+                        
+                        startIndex += 10;
+                    }
+                } else {
+                    imagesResults.innerHTML = '<p>No images found</p>';
+                }
+            } catch (error) {
+                console.error('Error fetching images:', error);
+                loading.style.display = 'none';
+                imagesResults.innerHTML = '<p>Error fetching images. Please try again.</p>';
+            }
+        }
+
+        function createImageItem(item) {
+            const imageItem = document.createElement('div');
+            imageItem.className = 'image-item';
+            
+            const img = document.createElement('img');
+            img.src = item.link;
+            img.alt = item.title;
+            img.loading = 'lazy';
+            
+            imageItem.appendChild(img);
+            
+            imageItem.addEventListener('click', () => {
+                // Open image in browser modal
+                openInBrowser(item.image.contextLink);
+            });
+            
+            return imageItem;
+        }
+
+        function openInBrowser(url) {
+            browserUrl.textContent = url;
+            browserIframe.src = url;
+            browserModal.style.display = 'flex';
+            
+            // Reset browser options
+            currentZoom = 100;
+            updateZoom();
+            desktopMode.checked = false;
+            isDesktopMode = false;
+            updateIframeUserAgent();
+            browserOptionsPanel.style.display = 'none';
+        }
+
+        function updateZoom() {
+            browserIframe.style.transform = `scale(${currentZoom / 100})`;
+            browserIframe.style.transformOrigin = '0 0';
+            browserIframe.style.width = `${100 / (currentZoom / 100)}%`;
+            browserIframe.style.height = `${100 / (currentZoom / 100)}%`;
+            zoomLevel.textContent = `${currentZoom}%`;
+        }
+
+        function updateIframeUserAgent() {
+            if (isDesktopMode) {
+                // Set desktop user agent
+                browserIframe.contentWindow.location.reload();
+            } else {
+                // Keep default (mobile) user agent
+                browserIframe.contentWindow.location.reload();
+            }
+        }
+
+        // Initialize with a sample search
+        window.addEventListener('DOMContentLoaded', () => {
+            searchInput.value = 'TikTok';
+            performSearch();
+        });
+    </script>
+</body>
+</html>
